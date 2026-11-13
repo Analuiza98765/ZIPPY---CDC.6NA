@@ -1,95 +1,88 @@
-# 🤖 ZIPPY — Smart Home 2050
+# Zippy — Simulador de Robô Móvel
 
-**Robótica, automação e tecnologia para as residências do futuro.**
+Simulador de navegação de robô móvel em uma planta residencial, com física diferencial,
+LiDAR de 360°, odometria, grade de ocupação, planejamento A* e replanejamento.
 
-## 📌 Sobre o projeto
+> **Escopo:** este projeto é uma simulação de software. O LiDAR, a odometria, os motores,
+> a posição e os obstáculos são simulados; não há conexão com um robô físico nem painel
+> recebendo dados de hardware. Os parâmetros físicos são estimativas e não devem ser
+> usados para controlar um robô real sem validação e calibração.
 
-O **Zippy** é um projeto de robô inteligente de limpeza e assistência doméstica, desenvolvido com a proposta de explorar a aplicação da tecnologia em residências inteligentes.
+## Requisitos
 
-A ideia é criar uma simulação de um robô capaz de realizar tarefas domésticas de forma automatizada, movimentando-se pelos ambientes de uma residência virtual e interagindo com os elementos presentes no cenário.
+- Python 3.10 ou superior
+- pygame 2.5 ou superior
+- numpy 1.24 ou superior
 
-O projeto combina modelagem tridimensional, programação e simulação virtual, utilizando Blender, Unity e Python.
+Instale as dependências:
 
-## 🎯 Objetivo
-
-Desenvolver e simular um robô doméstico inteligente, explorando conceitos de automação, computação gráfica e programação para representar uma solução tecnológica voltada às residências do futuro.
-
-## 🛠️ Tecnologias utilizadas
-
-| Tecnologia | Aplicação |
-|---|---|
-| Blender | Modelagem 3D do robô e da residência. |
-| Unity | Desenvolvimento do ambiente virtual e da simulação. |
-| Python | Programação da lógica e das funcionalidades do robô. |
-
-## ⚙️ Funcionalidades previstas
-
-- Movimentação pelos ambientes da residência.
-- Simulação de tarefas de limpeza.
-- Identificação e desvio de obstáculos.
-- Execução de ações automatizadas.
-- Interação com elementos do ambiente virtual.
-
-## 🏠 Desenvolvimento
-
-O projeto está dividido em três etapas principais:
-
-**1. Modelagem 3D — Blender**
-
-Criação da residência virtual, organização dos ambientes, objetos e desenvolvimento do modelo tridimensional do robô.
-
-**2. Simulação — Unity**
-
-Importação dos modelos 3D e construção do ambiente virtual para representar o funcionamento e a movimentação do Zippy.
-
-**3. Programação — Python**
-
-Desenvolvimento da lógica de funcionamento e implementação dos comportamentos automatizados do robô.
-
-## 📂 Estrutura do projeto
-
-```text
-ZIPPY/
-│
-├── Blender/
-│   ├── modelos/
-│   └── residencia/
-│
-├── Unity/
-│   └── projeto/
-│
-├── Python/
-│   └── scripts/
-│
-├── Documentacao/
-│   ├── imagens/
-│   └── relatorios/
-│
-└── README.md
+```bash
+python -m pip install -r requirements.txt
 ```
-## 🚧 Status do projeto
 
-Em desenvolvimento.
+## Executar
 
-As atividades atuais envolvem a modelagem da residência no Blender, a preparação do ambiente virtual e os primeiros testes de programação.
+Mantenha estes arquivos na mesma pasta:
 
-## 🔮 Próximas etapas
+- `Projeto_Zippy.py`
+- `Planta_Baixa_Modern_House.jpeg`
+- `requirements.txt`
 
-- Finalização da residência virtual.
-- Desenvolvimento do modelo 3D do Zippy.
-- Integração dos modelos no Unity.
-- Implementação das funcionalidades em Python.
-- Testes de movimentação e interação.
-- Avaliação dos resultados da simulação.
+O arquivo `Old.Projeto_Zippy.py` é uma cópia antiga e não é necessário para executar
+a versão atual.
 
-## 👥 Equipe
+Inicie com:
 
-Projeto acadêmico desenvolvido no curso de Ciência da Computação — UniFECAF.
+```bash
+python Projeto_Zippy.py
+```
 
-**Projeto:** Zippy — Smart Home 2050  
-**Evento:** ExpoTech 2026.2  
-**Instituição:** UniFECAF
+## Navegação simulada e segurança de movimento
 
----
+Os itens abaixo descrevem proteções geométricas e de controle dentro da simulação;
+eles não são controles de cibersegurança nem foram validados em hardware físico.
 
-*Zippy — Tecnologia e inovação para o futuro das residências.*
+- O planejador A* trabalha em uma grade de ocupação inflada pelo raio do robô
+  e por uma margem de segurança.
+- A suavização do caminho verifica a linha com amostragem densa e rejeita
+  diagonais que cortem quinas de células ocupadas.
+- O controlador reduz a velocidade e o avanço de mira para contornar curvas
+  com menor risco de cortar cantos.
+- A física verifica o volume varrido pelo robô durante cada passo, impedindo
+  que atravesse paredes e obstáculos.
+- Os vãos das portas fazem parte da geometria navegável, mas não são desenhados
+  como linhas brancas na interface.
+- Passagens sob móveis são liberadas somente para móveis marcados como
+  transitáveis e cuja altura livre estimada seja maior que a altura do robô
+  mais a margem vertical. Apoios continuam sendo obstáculos.
+
+## Ajustes físicos
+
+A planta é uma imagem superior e não informa alturas reais. Os parâmetros
+`ROBOT_HEIGHT`, `HEIGHT_MARGIN` e os valores de `MOVEIS_PASSAVEIS` são
+estimativas configuráveis. Antes de usar em um robô físico, meça o equipamento,
+as alturas dos móveis, as larguras das portas e calibre a escala da planta.
+
+A margem de navegação é definida por `INFLATE_CELLS`; aumentá-la torna o trajeto
+mais conservador, mas pode impedir a passagem por corredores estreitos.
+
+## Controles
+
+Os controles e atalhos disponíveis são apresentados na barra inferior e no
+painel lateral do simulador.
+
+## Validação de segurança
+
+Os testes controlados dos caminhos de cenário e save podem ser repetidos com:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+O teste intercepta `eval()` e `pickle.load()` com stubs; não executa payloads
+nem desserializa arquivos pickle. Portanto, é uma verificação dinâmica limitada
+de comportamento e alcance dos caminhos, não um pentest completo. O arquivo
+`Projeto_Zippy_vulneravel.py` contém exemplos intencionalmente inseguros e não
+deve ser executado com arquivos de origem desconhecida. Consulte
+`Documentacao-Zippy-NEXUS-ExpoTech-2026-Entrega-Revisada.pdf` para o relatório, os resultados e
+as limitações da validação.
