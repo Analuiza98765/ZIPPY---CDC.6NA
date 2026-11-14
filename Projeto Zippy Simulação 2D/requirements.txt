@@ -1,0 +1,4 @@
+numpy>=1.24
+pygame>=2.5
+pypdf>=4.0
+reportlab>=4.0
